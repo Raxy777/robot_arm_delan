@@ -30,13 +30,13 @@
     <!-- Link 1: rotates about the world origin -->
     <body name="link1" pos="0 0 0">
       <joint name="joint1"/>
-      <inertial pos="0.5 0 0" mass="1" diaginertia="1e-4 1e-4 0.0833333"/>
+      <inertial pos="0.5 0 0" mass="1" diaginertia="1e-4 0.0833333 0.0833333"/>
       <geom name="g_link1" fromto="0 0 0 1 0 0"/>
 
       <!-- Link 2: rotates about the elbow at the tip of link 1 -->
       <body name="link2" pos="1 0 0">
         <joint name="joint2"/>
-        <inertial pos="0.5 0 0" mass="1" diaginertia="1e-4 1e-4 0.0833333"/>
+        <inertial pos="0.5 0 0" mass="1" diaginertia="1e-4 0.0833333 0.0833333"/>
         <geom name="g_link2" fromto="0 0 0 1 0 0" rgba="0.8 0.4 0.2 1"/>
         <site name="ee" pos="1 0 0" size="0.05" rgba="0 0.8 0 1"/>
       </body>

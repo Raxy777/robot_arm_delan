@@ -1,0 +1,13 @@
+# Generated artifacts — regenerate with the scripts, don't commit
+data/
+models/
+outputs_run/
+
+# Python
+__pycache__/
+*.pyc
+_probe.py
+
+# OS / editor
+.DS_Store
+.ipynb_checkpoints/

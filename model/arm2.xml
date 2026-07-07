@@ -1,0 +1,51 @@
+<!--
+  2-link planar arm ("double pendulum with actuated joints").
+
+  Built to MATCH params.py exactly so the analytic dynamics agree with MuJoCo:
+    m1 = m2 = 1 kg, l1 = l2 = 1 m, com at 0.5 m, Izz = m L^2 / 12 = 0.08333.
+
+  Geometry conventions:
+    - Arm lies in the x-y plane, links extend along local +x.
+    - Gravity is (0, -9.81, 0)  -> along -y, matching dynamics.py.
+    - Hinge joints rotate about +z (out of the page).
+    - <inertial> is given explicitly, so it OVERRIDES geom-inferred mass and
+      inertia. The capsules are therefore purely visual; changing their size
+      will NOT change the dynamics. Edit params.py + these <inertial> tags
+      together, then run verify_dynamics.py.
+-->
+<mujoco model="arm2">
+  <compiler angle="radian" autolimits="true"/>
+  <option gravity="0 -9.81 0" timestep="0.001" integrator="RK4"/>
+
+  <default>
+    <joint type="hinge" axis="0 0 1" damping="0"/>
+    <geom type="capsule" size="0.04" rgba="0.2 0.4 0.8 1"/>
+  </default>
+
+  <worldbody>
+    <light pos="0 0 3" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
+    <geom name="floor" type="plane" pos="0 0 -0.01" size="5 5 0.1"
+          rgba="0.9 0.9 0.9 1" contype="0" conaffinity="0"/>
+
+    <!-- Link 1: rotates about the world origin -->
+    <body name="link1" pos="0 0 0">
+      <joint name="joint1"/>
+      <inertial pos="0.5 0 0" mass="1" diaginertia="1e-4 1e-4 0.0833333"/>
+      <geom name="g_link1" fromto="0 0 0 1 0 0"/>
+
+      <!-- Link 2: rotates about the elbow at the tip of link 1 -->
+      <body name="link2" pos="1 0 0">
+        <joint name="joint2"/>
+        <inertial pos="0.5 0 0" mass="1" diaginertia="1e-4 1e-4 0.0833333"/>
+        <geom name="g_link2" fromto="0 0 0 1 0 0" rgba="0.8 0.4 0.2 1"/>
+        <site name="ee" pos="1 0 0" size="0.05" rgba="0 0.8 0 1"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <!-- gear=1 => control input is joint torque directly, in N*m -->
+    <motor name="m1" joint="joint1" gear="1" ctrlrange="-60 60"/>
+    <motor name="m2" joint="joint2" gear="1" ctrlrange="-60 60"/>
+  </actuator>
+</mujoco>

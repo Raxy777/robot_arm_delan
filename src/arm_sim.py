@@ -19,9 +19,9 @@ import os
 
 import numpy as np
 
-import dynamics
+import src.dynamics as dynamics
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(HERE, "model", "arm2.xml")
 
 

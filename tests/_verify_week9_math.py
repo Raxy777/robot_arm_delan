@@ -13,10 +13,14 @@ the real model is in the network wiring, not the equations.
 Run:  python _verify_week9_math.py
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import numpy as np
 
-import dynamics
-from dynamics import mass_matrix, potential_energy
+import src.dynamics as dynamics
+from src.dynamics import mass_matrix, potential_energy
 
 
 def dV_dq(q, h=1e-6):

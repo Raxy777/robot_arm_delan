@@ -23,21 +23,25 @@ Outputs (to results/):
     python benchmark.py --seed 1        # different noise draw
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import argparse
 import csv
 import os
 
 import numpy as np
 
-import dynamics
-from controllers import InverseDynamicsController
-from kinematics import forward_kinematics
-from mlp_model import MLPInverseDynamics, build_inputs
-from delan_model import DeLaNInverseDynamics
-from plant import PlantSim, with_payload
-from trajectories import figure_eight, figure_eight_joint
+import src.dynamics as dynamics
+from src.controllers import InverseDynamicsController
+from src.kinematics import forward_kinematics
+from src.mlp_model import MLPInverseDynamics, build_inputs
+from src.delan_model import DeLaNInverseDynamics
+from src.plant import PlantSim, with_payload
+from src.trajectories import figure_eight, figure_eight_joint
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(HERE, "..", "Week_8", "data")
 MODELS = os.path.join(HERE, "models")
 RESULTS = os.path.join(HERE, "results")

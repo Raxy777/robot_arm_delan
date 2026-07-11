@@ -3,10 +3,14 @@
 Mirrors the exact logic in arm_sim.ArmSim(analytic) + data_collection, inlined
 here so it doesn't depend on the (sandbox-cache-stale) edited modules.
 """
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import numpy as np
-import dynamics
-from kinematics import inverse_kinematics
-from controllers import GravityCompPDController  # dynamics-only, safe
+import src.dynamics as dynamics
+from src.kinematics import inverse_kinematics
+from src.controllers import GravityCompPDController  # dynamics-only, safe
 
 DT = 0.001
 TAU_LIMIT = 60.0

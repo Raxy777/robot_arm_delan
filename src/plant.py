@@ -35,7 +35,7 @@ from dataclasses import dataclass, replace
 
 import numpy as np
 
-from params import PARAMS as NOMINAL
+from src.params import PARAMS as NOMINAL
 
 
 @dataclass(frozen=True)

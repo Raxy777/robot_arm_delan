@@ -19,7 +19,7 @@ Two rigid links in the vertical `x–y` plane, revolute joints, gravity along
 `−y`. Generalized coordinates `q = [q1, q2]`: `q1` from the `+x` axis to link 1,
 `q2` the relative elbow angle of link 2 w.r.t. link 1.
 
-Each link is a uniform thin rod. Default parameters (`params.py`):
+Each link is a uniform thin rod. Default parameters (`src/params.py`):
 
 | symbol | meaning | value |
 |--------|---------|-------|
@@ -96,11 +96,11 @@ g2 = m2 lc2 g cos(q1+q2)
 
 This `C` is the specific choice that makes `Ṁ − 2C` skew-symmetric — the
 energy-consistency property the verification below relies on. All of this is
-implemented verbatim in `dynamics.py`.
+implemented verbatim in `src/dynamics.py`.
 
 ---
 
-## 3. Controllers (`controllers.py`)
+## 3. Controllers (`src/controllers.py`)
 
 All hand-written, no control library:
 
@@ -119,7 +119,7 @@ controller code doesn't change; only the model does. That is the experiment.
 
 ---
 
-## 4. Task-space figure-eight (`trajectories.py`, `kinematics.py`)
+## 4. Task-space figure-eight (`src/trajectories.py`, `src/kinematics.py`)
 
 The end-effector traces a Lissajous "8":
 `x(t) = cx + A sin(ωt)`, `y(t) = cy + B sin(2ωt)`.
@@ -144,12 +144,12 @@ differentiate. A *designed* reference like this one is computed in closed form.)
 pip install -r requirements.txt
 
 # verify the hand-derived model first
-python verify_dynamics.py
+python tests/verify_dynamics.py
 
 # track the figure-eight and render a video
-python run_sim.py --controller computed_torque --video
-python run_sim.py --controller pd            # see it lag/droop for contrast
-python run_sim.py --controller gravity_pd
+python scripts/run_sim.py --controller computed_torque --video
+python scripts/run_sim.py --controller pd            # see it lag/droop for contrast
+python scripts/run_sim.py --controller gravity_pd
 ```
 
 Outputs land in `outputs_run/`: `figure_eight.mp4`, `tracking.png`, `log.npz`.
@@ -181,13 +181,16 @@ your XML matches the analytic parameters (expect max torque error ~1e-9).
 
 ```
 robot_arm_delan/
-├── params.py           # single source of truth for physical constants
-├── dynamics.py         # M(q), C(q,q̇), g(q), forward/inverse dynamics, energy
-├── kinematics.py       # FK, IK, Jacobian, J̇, task→joint mapping
-├── trajectories.py     # figure-eight reference
-├── controllers.py      # PD, gravity-comp PD, computed torque
-├── run_sim.py          # MuJoCo sim loop → video + tracking plots + log
-├── verify_dynamics.py  # energy check + MuJoCo cross-check
+├── src/
+│   ├── params.py           # single source of truth for physical constants
+│   ├── dynamics.py         # M(q), C(q,q̇), g(q), forward/inverse dynamics, energy
+│   ├── kinematics.py       # FK, IK, Jacobian, J̇, task→joint mapping
+│   ├── trajectories.py     # figure-eight reference
+│   └── controllers.py      # PD, gravity-comp PD, computed torque
+├── scripts/
+│   └── run_sim.py          # MuJoCo sim loop → video + tracking plots + log
+├── tests/
+│   └── verify_dynamics.py  # energy check + MuJoCo cross-check
 ├── model/arm2.xml      # MuJoCo model, built to match params.py
 └── requirements.txt
 ```
@@ -198,4 +201,4 @@ robot_arm_delan/
 - [x] Derive the analytic dynamics by hand (this README)
 - [x] Implement PD and computed-torque control with the known model
 - [ ] Record the deliverable video of the arm tracking a figure-eight
-      → run `python run_sim.py --controller computed_torque --video`
+      → run `python scripts/run_sim.py --controller computed_torque --video`

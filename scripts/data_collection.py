@@ -20,15 +20,19 @@ Usage:
     python data_collection.py --backend analytic # fast, no MuJoCo needed
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import argparse
 import os
 
 import numpy as np
 
-from arm_sim import ArmSim
-import controllers
+from src.arm_sim import ArmSim
+import src.controllers as controllers
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(HERE, "data")
 
 WORKSPACE_R = (0.5, 1.8)  # reachable radii to sample targets from (l1+l2 = 2)

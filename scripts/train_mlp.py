@@ -7,6 +7,10 @@ RMSE on the in-distribution and OOD test sets so you can see the extrapolation
 gap immediately. Saves the model to models/mlp.pt.
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import argparse
 import os
 
@@ -14,9 +18,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from mlp_model import MLP, MLPInverseDynamics, Standardizer, build_inputs
+from src.mlp_model import MLP, MLPInverseDynamics, Standardizer, build_inputs
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(HERE, "data")
 MODELS = os.path.join(HERE, "models")
 

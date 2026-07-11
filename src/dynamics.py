@@ -14,7 +14,7 @@ All functions take numpy arrays q = [q1, q2], qd = [q1d, q2d].
 
 import numpy as np
 
-from params import PARAMS as P
+from src.params import PARAMS as P
 
 
 def mass_matrix(q):

@@ -7,7 +7,7 @@ acceleration, then convert to a joint-space reference via kinematics.
 
 import numpy as np
 
-from kinematics import task_to_joint
+from src.kinematics import task_to_joint
 
 
 def figure_eight(t, center=(1.0, 0.6), A=0.5, B=0.35, period=6.0):

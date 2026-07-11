@@ -15,7 +15,7 @@ DeLaN) and keep the controller structure identical. That's the experiment.
 
 import numpy as np
 
-import dynamics
+import src.dynamics as dynamics
 
 
 class PDController:

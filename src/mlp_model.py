@@ -87,7 +87,7 @@ class MLPInverseDynamics:
 
     @classmethod
     def load(cls, path, device="cpu"):
-        ck = torch.load(path, map_location=device)
+        ck = torch.load(path, map_location=device, weights_only=False)
         net = MLP(hidden=tuple(ck["hidden"]))
         net.load_state_dict(ck["state_dict"])
         return cls(net,

@@ -13,15 +13,19 @@ DeLaN stays closer to analytic than the MLP as you move out of distribution.
     python evaluate_all.py --backend mujoco
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import argparse
 import os
 
 import numpy as np
 
-import dynamics
+import src.dynamics as dynamics
 from evaluate_model import closed_loop_track, REGIMES
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(HERE, "data")
 MODELS = os.path.join(HERE, "models")
 
@@ -31,10 +35,10 @@ def _load_models():
     mlp_path = os.path.join(MODELS, "mlp.pt")
     delan_path = os.path.join(MODELS, "delan.pt")
     if os.path.exists(mlp_path):
-        from mlp_model import MLPInverseDynamics
+        from src.mlp_model import MLPInverseDynamics
         models["mlp"] = MLPInverseDynamics.load(mlp_path)
     if os.path.exists(delan_path):
-        from delan_model import DeLaNInverseDynamics
+        from src.delan_model import DeLaNInverseDynamics
         models["delan"] = DeLaNInverseDynamics.load(delan_path)
     return models
 
@@ -46,7 +50,7 @@ def _torque_rmse(model, split):
         pred = np.array([dynamics.inverse_dynamics(q[i], qd[i], qdd[i])
                          for i in range(len(q))])
     elif hasattr(model, "predict"):          # MLP: fast batched path
-        from mlp_model import build_inputs
+        from src.mlp_model import build_inputs
         pred = model.predict(build_inputs(q, qd, qdd))
     else:                                    # DeLaN: per-sample numpy wrapper
         pred = np.array([model.inverse_dynamics(q[i], qd[i], qdd[i])

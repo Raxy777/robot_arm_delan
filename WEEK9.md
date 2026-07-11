@@ -18,7 +18,7 @@ The notebook: clones the repo → installs deps → **validates the EL math** �
 
 ```
 # drop delan.pt (and mlp.pt) into models/, then:
-python evaluate_all.py --backend analytic     # or mujoco
+python scripts/evaluate_all.py --backend analytic     # or mujoco
 ```
 
 ## The method in one screen (interview-ready)

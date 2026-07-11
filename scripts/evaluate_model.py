@@ -13,18 +13,22 @@ end-effector RMS tracking error. Two regimes:
 The analytic model is the gold standard (upper bound). Compare the MLP to it.
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import argparse
 import os
 
 import numpy as np
 
-import dynamics
-from arm_sim import ArmSim
-from controllers import InverseDynamicsController
-from kinematics import forward_kinematics
-from trajectories import figure_eight, figure_eight_joint
+import src.dynamics as dynamics
+from src.arm_sim import ArmSim
+from src.controllers import InverseDynamicsController
+from src.kinematics import forward_kinematics
+from src.trajectories import figure_eight, figure_eight_joint
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 REGIMES = {
     "nominal": dict(period=6.0, A=0.5, B=0.35),
@@ -66,7 +70,7 @@ def main():
     models = {"analytic": dynamics}
     mlp_path = os.path.join(HERE, "models", "mlp.pt")
     if os.path.exists(mlp_path):
-        from mlp_model import MLPInverseDynamics
+        from src.mlp_model import MLPInverseDynamics
         models["mlp"] = MLPInverseDynamics.load(mlp_path)
     else:
         print("[note] models/mlp.pt not found - train it first with train_mlp.py.")

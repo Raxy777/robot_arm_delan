@@ -12,7 +12,7 @@ about *measured* data; a designed reference should be computed analytically).
 
 import numpy as np
 
-from params import PARAMS as P
+from src.params import PARAMS as P
 
 
 def forward_kinematics(q):

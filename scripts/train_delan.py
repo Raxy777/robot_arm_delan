@@ -17,6 +17,10 @@ Notes
   _verify_week9_math.py confirms the assembly formula independently of torch.
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import argparse
 import os
 
@@ -24,10 +28,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from delan_model import DeLaN, DeLaNInverseDynamics
-from mlp_model import build_inputs
+from src.delan_model import DeLaN, DeLaNInverseDynamics
+from src.mlp_model import build_inputs
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(HERE, "data")
 MODELS = os.path.join(HERE, "models")
 

@@ -13,6 +13,10 @@ Figures
                       tight diagonal = good extrapolation
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import csv
 import os
 
@@ -21,7 +25,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RESULTS = os.path.join(HERE, "results")
 
 COLORS = {"analytic": "#444444", "mlp": "#d1495b", "delan": "#2e86ab"}

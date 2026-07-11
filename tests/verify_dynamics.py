@@ -15,9 +15,13 @@ Two independent checks:
 Run:  python verify_dynamics.py
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import numpy as np
 
-import dynamics
+import src.dynamics as dynamics
 
 
 def energy_conservation_test(duration=20.0, dt=1e-4, q0=(2.2, -1.3),
@@ -63,7 +67,7 @@ def compare_with_mujoco(n_samples=500, seed=0, verbose=True):
         print("[skip] mujoco not installed; skipping MuJoCo cross-check.")
         return None
 
-    here = os.path.dirname(os.path.abspath(__file__))
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     model = mujoco.MjModel.from_xml_path(os.path.join(here, "model", "arm2.xml"))
     data = mujoco.MjData(model)
 

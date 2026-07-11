@@ -11,15 +11,15 @@ DeLaN exists (Week 9).
 pip install -r requirements.txt          # now also needs torch
 
 # 1. collect data (real deliverable uses MuJoCo)
-python data_collection.py --backend mujoco
+python scripts/data_collection.py --backend mujoco
 #    -> data/train.npz, data/test_id.npz, data/test_ood.npz
 
 # 2. train the MLP
-python train_mlp.py --epochs 300
+python scripts/train_mlp.py --epochs 300
 #    -> models/mlp.pt ; prints in-dist vs OOD torque RMSE
 
 # 3. closed-loop comparison (MLP vs analytic, nominal vs fast)
-python evaluate_model.py --backend mujoco
+python scripts/evaluate_model.py --backend mujoco
 ```
 
 Everything also runs with `--backend analytic` (no MuJoCo needed) — that's how

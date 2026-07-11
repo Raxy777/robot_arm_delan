@@ -26,15 +26,19 @@ drift, not absolute level, is what conservation is about.
     python energy.py                 # writes results/energy_drift.csv
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import csv
 import os
 
 import numpy as np
 
-import dynamics
-from delan_model import DeLaNInverseDynamics
+import src.dynamics as dynamics
+from src.delan_model import DeLaNInverseDynamics
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS = os.path.join(HERE, "models")
 RESULTS = os.path.join(HERE, "results")
 

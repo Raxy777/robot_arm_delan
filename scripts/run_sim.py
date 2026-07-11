@@ -15,6 +15,10 @@ Outputs (in ./outputs_run/):
     log.npz               - full time series (for reuse in later weeks)
 """
 
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 import argparse
 import os
 
@@ -22,11 +26,11 @@ import numpy as np
 
 import mujoco
 
-import controllers
-from kinematics import forward_kinematics
-from trajectories import figure_eight_joint, figure_eight
+import src.controllers as controllers
+from src.kinematics import forward_kinematics
+from src.trajectories import figure_eight_joint, figure_eight
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(HERE, "model", "arm2.xml")
 OUT_DIR = os.path.join(HERE, "outputs_run")
 

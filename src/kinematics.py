@@ -85,3 +85,24 @@ def task_to_joint(x, xd, xdd, elbow_up=True):
     Jd = jacobian_dot(q, qd)
     qdd = Jinv @ (xdd - Jd @ qd)
     return q, qd, qdd
+
+
+def link_com_velocities(q, qd):
+    """World-frame planar COM velocities for links 1 and 2 (shape ``(2, 2)``)."""
+    q1, q2 = np.asarray(q, float)
+    q1d, q2d = np.asarray(qd, float)
+    s1, c1 = np.sin(q1), np.cos(q1)
+    s12, c12 = np.sin(q1 + q2), np.cos(q1 + q2)
+
+    J1 = np.array([[-P.lc1 * s1, 0.0],
+                   [ P.lc1 * c1, 0.0]])
+    J2 = np.array([[-P.l1 * s1 - P.lc2 * s12, -P.lc2 * s12],
+                   [ P.l1 * c1 + P.lc2 * c12,  P.lc2 * c12]])
+    return np.stack((J1 @ np.array([q1d, q2d]),
+                     J2 @ np.array([q1d, q2d])))
+
+
+def link_relative_velocities(q, qd, flow_velocity):
+    """Link-COM velocity relative to a uniform world-frame fluid velocity."""
+    flow_xy = np.asarray(flow_velocity, float)[:2]
+    return link_com_velocities(q, qd) - flow_xy[None, :]

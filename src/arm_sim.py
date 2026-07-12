@@ -16,6 +16,7 @@ straight from the dynamics, never finite-differenced from velocities.
 """
 
 import os
+from dataclasses import dataclass
 
 import numpy as np
 
@@ -25,8 +26,28 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(HERE, "model", "arm2.xml")
 
 
+@dataclass(frozen=True)
+class FluidConfig:
+    """Uniform ambient-fluid configuration for the Phase-1 MVP.
+
+    ``flow_velocity`` is the world-frame velocity of the fluid in m/s.  The
+    default density/viscosity approximate fresh water near room temperature.
+    Passing ``None`` to ArmSim preserves the original no-fluid baseline.
+    """
+
+    density: float = 1000.0
+    viscosity: float = 1.0e-3
+    flow_velocity: tuple = (0.0, 0.0, 0.0)
+
+    def __post_init__(self):
+        if self.density < 0 or self.viscosity < 0:
+            raise ValueError("density and viscosity must be non-negative")
+        if len(self.flow_velocity) != 3:
+            raise ValueError("flow_velocity must contain three components")
+
+
 class ArmSim:
-    def __init__(self, backend="mujoco", dt=0.001, tau_limit=60.0):
+    def __init__(self, backend="mujoco", dt=0.001, tau_limit=60.0, fluid=None):
         self.backend = backend
         self._tau = np.zeros(2)
         # Actuator torque saturation. Matches ctrlrange in model/arm2.xml so the
@@ -39,7 +60,15 @@ class ArmSim:
             self.model = mujoco.MjModel.from_xml_path(MODEL_PATH)
             self.data = mujoco.MjData(self.model)
             self.dt = float(self.model.opt.timestep)
+            self.fluid = fluid
+            if fluid is not None:
+                self.model.opt.density = float(fluid.density)
+                self.model.opt.viscosity = float(fluid.viscosity)
+                self.model.opt.wind[:] = np.asarray(fluid.flow_velocity, float)
         elif backend == "analytic":
+            if fluid is not None:
+                raise ValueError("uniform fluid is currently supported only by the MuJoCo backend")
+            self.fluid = None
             self.dt = float(dt)
             self._q = np.zeros(2)
             self._qd = np.zeros(2)
@@ -53,6 +82,7 @@ class ArmSim:
         if self.backend == "mujoco":
             self.data.qpos[:] = q
             self.data.qvel[:] = qd
+            self.data.ctrl[:] = 0.0
             self._mj.mj_forward(self.model, self.data)
         else:
             self._q = q.copy()
@@ -68,6 +98,12 @@ class ArmSim:
     def qd(self):
         return self.data.qvel.copy() if self.backend == "mujoco" else self._qd.copy()
 
+    @property
+    def flow_velocity(self):
+        if self.backend == "mujoco":
+            return self.model.opt.wind.copy()
+        return np.zeros(3)
+
     def set_torque(self, tau):
         self._tau = np.clip(np.asarray(tau, float),
                             -self.tau_limit, self.tau_limit)
@@ -79,6 +115,14 @@ class ArmSim:
             self._mj.mj_forward(self.model, self.data)
             return self.data.qacc.copy()
         return dynamics.forward_dynamics(self._q, self._qd, self._tau)
+
+    def passive_torque(self):
+        """MuJoCo passive generalized force (fluid force for this zero-damping XML)."""
+        if self.backend != "mujoco":
+            return np.zeros(2)
+        self.data.ctrl[:] = self._tau
+        self._mj.mj_forward(self.model, self.data)
+        return self.data.qfrc_passive.copy()
 
     def joint_torque(self):
         """Generalized joint torque actually applied (== ctrl since gear=1)."""

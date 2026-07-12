@@ -202,3 +202,23 @@ robot_arm_delan/
 - [x] Implement PD and computed-torque control with the known model
 - [ ] Record the deliverable video of the arm tracking a figure-eight
       → run `python scripts/run_sim.py --controller computed_torque --video`
+
+
+## Phase 1.3: MPPI rate hierarchy
+
+`src/mppi.py` adds a model-agnostic, PyTorch-batched MPPI optimizer and a
+deterministic multi-rate bridge. Production defaults are locked to 1024
+samples, a 25-step horizon, temperature `lambda=1.0`, 50 Hz replanning, and a
+1000 Hz linearly interpolated torque loop. The included nominal batched model
+is a fallback; pass the structured residual forward model through the same
+`dynamics(state, torque, dt)` interface when available.
+
+```bash
+python tests/verify_phase1_3_mppi.py
+python scripts/phase1_3_mppi_benchmark.py --iterations 50 --out /tmp/phase1_3.json
+```
+
+The benchmark records mean, p95, and worst solve latency. A p95 below the
+20 ms deadline is the Phase 1.3 compute gate; retain the worst time in reports
+even when the gate passes. CPU results are development measurements only—rerun
+on the deployment GPU before making a real-time claim.

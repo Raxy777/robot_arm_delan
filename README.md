@@ -253,3 +253,56 @@ python scripts/phase1_4_residual_benchmark.py --iterations 50 --out /tmp/phase1_
 ```
 
 Rerun it on the target GPU before making a real-time claim.
+
+### Phase 1.4 hard gates (pre-registered)
+
+The structured model remains **uncalibrated** until it passes all gates below.
+The thresholds are fixed before training:
+
+1. On held-out 25-step rollouts spanning at least 3 unseen flow regimes and 5
+random seeds, mean residual-model RMSE must be at most 75% of nominal-model
+RMSE, and the residual must beat nominal in at least 80% of cases.
+2. In closed loop, residual MPPI must improve mean tracking RMSE by at least 10%
+over nominal MPPI across at least 3 flows and 5 seeds.
+3. Stress results must include flow-estimation errors of 0%, ±20%, and ±50%,
+sensor delays of 0/10/20 ms, and state-noise standard deviations of
+0/0.01/0.03. Stressors are varied one at a time for attributable failures.
+4. The selected controller profile must meet a 20 ms p95 planning deadline.
+A lower-cost profile is accepted only if it also passes the closed-loop gate.
+
+Apply the calibration gate to held-out results (never training trajectories):
+
+```bash
+python scripts/phase1_4_calibration_gate.py held_out_rollouts.npz \
+--out results/phase1_4_calibration_gate.json
+```
+
+The NPZ must contain equal-length `nominal_rmse`, `residual_rmse`, `flow_id`,
+and `seed` arrays. A failing gate exits with status 2.
+
+The latency benchmark now uses float32, warm starts (already built into MPPI),
+100 timed iterations after warm-up, and moving states/references rather than a
+single zero state. It tests profiles in quality-first order:
+
+```bash
+python scripts/phase1_4_residual_benchmark.py --iterations 100 --warmup 10 \
+--profiles 1024x25 768x20 512x20 --out results/phase1_4_timing_sweep.json
+```
+
+On the development CPU, the analytic 2x2 dynamics solve plus the 768x20 profile
+reduced measured p95 to 14.49 ms and passed the 20 ms compute gate. The 1024x25
+profile still missed at 20.95 ms. These figures are machine-specific and do not
+replace target-hardware measurements.
+
+Run the early nominal-vs-residual ablation and robustness sweep with:
+
+```bash
+python scripts/phase1_4_closed_loop_ablation.py \
+--out results/phase1_4_closed_loop_ablation.json
+```
+
+The initial uncalibrated coefficients improved tracking by only 1.50% in this
+structured-model-plant smoke test, below the pre-registered 10% gate. Therefore
+Phase 1.4 currently **fails the benefit gate** despite passing its reduced
+compute profile. This simplified plant is neither CFD nor hardware truth; use
+held-out MuJoCo traces for calibration and then repeat on deployment hardware.

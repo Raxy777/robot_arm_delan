@@ -222,3 +222,34 @@ The benchmark records mean, p95, and worst solve latency. A p95 below the
 20 ms deadline is the Phase 1.3 compute gate; retain the worst time in reports
 even when the gate passes. CPU results are development measurements only—rerun
 on the deployment GPU before making a real-time claim.
+
+## Phase 1.4: structured hydrodynamic residual
+
+`src/residual_dynamics.py` provides a flow-conditioned forward model that is a
+drop-in replacement for MPPI's nominal model. It computes link relative
+velocity as `J(q) qdot - v_fluid`, maps non-negative linear/quadratic drag
+through `J.T`, and parameterizes each task-space added-mass matrix as `L L.T`.
+The resulting joint-space added mass is added to the rigid-body mass matrix
+before solving for acceleration. Call `set_flow(...)` with the known uniform
+flow before each plan; do not hide changing flow regimes from the model.
+
+```bash
+python tests/verify_phase1_4_residual.py
+```
+
+This acceptance check covers physical matrix constraints, dissipative drag,
+recovery of the nominal baseline, explicit flow conditioning, finite training
+gradients, and the Phase 1.3 MPPI interface. It does **not** establish learned
+accuracy. That requires training only on designated trajectories/flows and
+reporting one-step and rollout errors on held-out trajectories, payloads, flow
+regimes, noise/delay conditions, and random seeds. MuJoCo fluid forces remain a
+simplified simulation target—not CFD ground truth.
+
+A separate smoke benchmark measures the structured model inside the production
+MPPI budget and reports mean, p95, and worst solve latency:
+
+```bash
+python scripts/phase1_4_residual_benchmark.py --iterations 50 --out /tmp/phase1_4_timing.json
+```
+
+Rerun it on the target GPU before making a real-time claim.

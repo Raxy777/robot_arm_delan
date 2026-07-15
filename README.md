@@ -306,3 +306,26 @@ structured-model-plant smoke test, below the pre-registered 10% gate. Therefore
 Phase 1.4 currently **fails the benefit gate** despite passing its reduced
 compute profile. This simplified plant is neither CFD nor hardware truth; use
 held-out MuJoCo traces for calibration and then repeat on deployment hardware.
+
+
+## Phase 1 latency-aware hydrodynamic dataset
+
+`scripts/phase1_latency_data.py` collects the raw identification traces for the
+latency/ZOH portion of Phase 1. Every episode uses a known, constant uniform
+flow and a multi-frequency reference reaching 3 Hz to excite quadratic drag.
+Sensor and actuator latency use separate causal queues; the controller runs at
+a configurable lower rate while the 1 kHz plant holds its latest command.
+
+```bash
+python tests/verify_phase1_latency_data.py
+python scripts/phase1_latency_data.py --episodes 24 --duration 4 \
+  --flow 0.3 0.0 0.0 --control-period-steps 10 \
+  --sensor-delays 0 10 20 --actuation-delays 0 5 10 \
+  --out data/phase1_latency_raw.npz
+```
+
+The NPZ records true and observed state, true acceleration, commanded and
+applied torque, uniform-flow context, link-relative velocities, passive fluid
+torque, sensor/actuation delays, ZOH command ages, references, and episode and
+trajectory IDs. Keep trajectory IDs intact when constructing train/validation/
+test splits; never split adjacent samples from one trajectory across sets.

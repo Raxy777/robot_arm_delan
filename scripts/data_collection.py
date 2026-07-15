@@ -73,7 +73,7 @@ def collect_pd_setpoints(sim, rng, n_targets, hold_len, kp=80.0, kd=20.0):
     """Gravity-comp PD to random reachable targets. Gains are kept modest so the
     approach is smooth and torques stay within the actuator limit — this fills
     in near-static and low-speed poses, complementing the multisine bursts."""
-    from kinematics import inverse_kinematics
+    from src.kinematics import inverse_kinematics
     ctrl = controllers.GravityCompPDController(kp=kp, kd=kd)
     dt = sim.dt
     Q, QD, QDD, TAU = [], [], [], []

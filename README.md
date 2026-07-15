@@ -329,3 +329,19 @@ applied torque, uniform-flow context, link-relative velocities, passive fluid
 torque, sensor/actuation delays, ZOH command ages, references, and episode and
 trajectory IDs. Keep trajectory IDs intact when constructing train/validation/
 test splits; never split adjacent samples from one trajectory across sets.
+
+### Leakage-safe Phase 1 splits
+
+Split raw identification data by complete trajectory—not by adjacent rows—so
+one physical rollout can never occur in both training and evaluation:
+
+```bash
+python scripts/phase1_split_dataset.py data/phase1_latency_raw.npz \
+  --out-dir data/phase1_splits --ratios 0.7 0.2 0.1 --seed 0
+python tests/verify_phase1_dataset_splits.py
+```
+
+The command writes `train.npz`, `validation.npz`, `test.npz`, and a deterministic
+`split_manifest.json`. The manifest records source/output SHA-256 checksums,
+seed, ratios, sample counts, and exact trajectory IDs for reproducibility.
+All fields remain row-aligned and retain source order within each split.

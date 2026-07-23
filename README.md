@@ -345,3 +345,26 @@ The command writes `train.npz`, `validation.npz`, `test.npz`, and a deterministi
 `split_manifest.json`. The manifest records source/output SHA-256 checksums,
 seed, ratios, sample counts, and exact trajectory IDs for reproducibility.
 All fields remain row-aligned and retain source order within each split.
+
+### Phase 1: calibrate the global structured hydrodynamic model
+
+After collecting and trajectory-splitting the dataset, fit only on `train.npz`,
+select the checkpoint using `validation.npz`, and report the untouched test set:
+
+```bash
+python scripts/phase1_calibrate_hydrodynamics.py data/phase1_splits \
+  --out artifacts/phase1_global_hydrodynamics.json \
+  --steps 1500 --batch-size 4096 --seed 0
+```
+
+The JSON artifact contains the constrained drag coefficients, strictly-SPD
+added-mass matrices, exact optimizer settings, split checksums, and metrics for
+all three splits. Add `--min-test-improvement PERCENT` to make held-out
+improvement a required command-line gate. Load it without pickle execution via
+`load_calibrated_model` in `src.hydrodynamic_calibration`.
+
+Verification:
+
+```bash
+python tests/verify_phase1_hydrodynamic_calibration.py
+```

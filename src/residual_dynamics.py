@@ -41,6 +41,7 @@ class StructuredResidualConfig:
     quadratic_drag: tuple[float, float] = (0.25, 0.25)
     added_mass_diag: tuple[float, float] = (0.05, 0.05)
     coefficient_floor: float = 1.0e-8
+    added_mass_spd_floor: float = 1.0e-12
 
     def __post_init__(self):
         values = self.linear_drag + self.quadratic_drag + self.added_mass_diag
@@ -48,8 +49,9 @@ class StructuredResidualConfig:
             raise ValueError("drag coefficients must contain one value per link")
         if len(self.added_mass_diag) != 2:
             raise ValueError("added_mass_diag must contain one value per link")
-        if min(values) < 0 or self.coefficient_floor <= 0:
-            raise ValueError("physical coefficients must be non-negative and floor positive")
+        if (min(values) < 0 or self.coefficient_floor <= 0
+                or self.added_mass_spd_floor <= 0):
+            raise ValueError("physical coefficients must be non-negative and floors positive")
 
 
 class StructuredHydrodynamicDynamics(nn.Module):
@@ -110,7 +112,8 @@ class StructuredHydrodynamicDynamics(nn.Module):
         L[:, 0, 0] = F.softplus(raw[:, 0])
         L[:, 1, 0] = raw[:, 1]
         L[:, 1, 1] = F.softplus(raw[:, 2])
-        return L @ L.transpose(-1, -2)
+        identity = torch.eye(2, dtype=L.dtype, device=L.device).expand(2, -1, -1)
+        return L @ L.transpose(-1, -2) + self.config.added_mass_spd_floor * identity
 
     def link_jacobians(self, q):
         """Link-COM Jacobians, shape ``(..., 2 links, xy, 2 joints)``."""

@@ -368,3 +368,33 @@ Verification:
 ```bash
 python tests/verify_phase1_hydrodynamic_calibration.py
 ```
+
+## Phase 1 held-out rollout gate
+
+After Task 3 calibration, evaluate the saved model only on the untouched test
+split recorded in its artifact. The gate compares rigid-only and calibrated
+hydrodynamic predictions for generalized fluid torque, one-step acceleration,
+and 100-step recorded-input rollouts. Rollouts reset at held-out windows, never
+cross trajectory boundaries, and are stratified by flow and delay condition.
+
+```bash
+python scripts/phase1_heldout_rollout_gate.py \
+  artifacts/phase1_global_hydrodynamics.json \
+  data/phase1_splits/test.npz \
+  --out results/phase1_heldout_rollout_gate.json \
+  --plot results/phase1_heldout_rollout_gate.png \
+  --horizon-steps 100 --stride-steps 100 \
+  --min-torque-improvement 10 --min-rollout-improvement 10 \
+  --fail-on-gate
+```
+
+The test-file checksum must match the untouched test split registered during
+calibration. A separately documented external holdout may be evaluated with
+`--allow-unregistered-test`; the mismatch remains explicit in the result.
+Optional absolute limits are available through `--max-position-rmse` and
+`--max-position-p95`. Do not tune coefficients or thresholds on this test set.
+Run the deterministic checks with:
+
+```bash
+python tests/verify_phase1_heldout_rollouts.py
+```
